@@ -1,8 +1,11 @@
 package za.co.addcolour.tiltgame.ui;
 
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -12,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import za.co.addcolour.tiltgame.R;
 import za.co.addcolour.tiltgame.databinding.ContentColorDialogBinding;
+import za.co.addcolour.tiltgame.helper.SharedPrefsHelper;
 import za.co.addcolour.tiltgame.ui.adapter.ColorPickerAdapter;
 import za.co.addcolour.tiltgame.ui.clickCallback.ColorPickerClickCallback;
 
@@ -50,7 +54,7 @@ public abstract class BaseActivity extends AppCompatActivity
 
         mBinding.btnPlayGame.setOnClickListener(v -> {
             mDialog.dismiss();
-            omStartClicked(true);
+            omStartClicked();
         });
 
         builder.setCancelable(false);
@@ -60,10 +64,18 @@ public abstract class BaseActivity extends AppCompatActivity
         if (!isFinishing()) mDialog.show();
     }
 
-    protected abstract void omStartClicked(boolean isStarted);
+    public void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    protected abstract void omStartClicked();
 
     @Override
     public void onClick(int color) {
+        PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(color,
+                PorterDuff.Mode.SRC_ATOP);
+        mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
+        SharedPrefsHelper.INSTANCE.setColorCode(this, color);
     }
 
     @Override

@@ -7,7 +7,11 @@
     <string name="txt_choose_color">Choose color</string>
     <string name="txt_seconds">Seconds</string>
     <string name="txt_second">Second</string>
+    <string name="txt_game_has_begun">Game has Begun!</string>
+    <string name="txt_score">Score: </string>
+    <string name="txt_game_over">Game Over</string>
 
     <!-- BUTTONS  -->
     <string name="btn_play_game">Play Game</string>
+    <string name="btn_play_again">PLAY AGAIN</string>
 </resources>

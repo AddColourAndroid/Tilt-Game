@@ -54,13 +54,13 @@
 
                 <ImageView
                     android:id="@+id/image_view_arrow"
-                    android:layout_width="54dp"
-                    android:layout_height="54dp"
+                    android:layout_width="@dimen/margin_96"
+                    android:layout_height="@dimen/margin_96"
                     android:layout_centerInParent="true"
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/ic_arrow_forward"
+                    android:src="@drawable/ic_arrow_circle"
                     android:tint="@color/pink_900"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
