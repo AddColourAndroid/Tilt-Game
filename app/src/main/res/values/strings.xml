@@ -5,6 +5,8 @@
 
     <!-- TEXT VIEW  -->
     <string name="txt_choose_color">Choose color</string>
+    <string name="txt_seconds">Seconds</string>
+    <string name="txt_second">Second</string>
 
     <!-- BUTTONS  -->
     <string name="btn_play_game">Play Game</string>
