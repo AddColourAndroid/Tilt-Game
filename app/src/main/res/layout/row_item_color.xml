@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="colorCode"
+            type="Integer" />
+
+        <variable
+            name="callback"
+            type="za.co.addcolour.tiltgame.ui.clickCallback.ColorPickerClickCallback" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_item_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_2"
+        android:onClick="@{() ->  callback.onClick(colorCode)}">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_color_item"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/margin_96"
+            android:background="@{colorCode}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="windowBackground">#FFFFFF</color>
+
+    <color name="pink_900">#880e4f</color>
+    <color name="steal_900">#004d40</color>
+    <color name="green_900">#1b5e20</color>
+    <color name="purple_900">#4a148c</color>
+
+    <integer-array name="android_colors">
+        <item>@color/pink_900</item>
+        <item>@color/steal_900</item>
+        <item>@color/green_900</item>
+        <item>@color/purple_900</item>
+    </integer-array>
 </resources>

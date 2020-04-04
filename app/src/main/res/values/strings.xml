@@ -1,3 +1,11 @@
 <resources>
+
     <string name="app_name">Tilt Game</string>
+    <string name="txt_choose_arrow_color">Choose arrow color</string>
+
+    <!-- TEXT VIEW  -->
+    <string name="txt_choose_color">Choose color</string>
+
+    <!-- BUTTONS  -->
+    <string name="btn_play_game">Play Game</string>
 </resources>
