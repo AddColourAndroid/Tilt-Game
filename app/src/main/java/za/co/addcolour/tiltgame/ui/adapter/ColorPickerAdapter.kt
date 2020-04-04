@@ -19,9 +19,7 @@ class ColorPickerAdapter(private val mColorPickerClickCallback: ColorPickerClick
         if (mList == null) {
             mList = list
             notifyItemRangeInserted(0, list.size)
-        } else {
-            mList = list
-        }
+        } else mList = list
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorPickerViewHolder {
