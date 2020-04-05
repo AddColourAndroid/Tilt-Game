@@ -1,4 +1,4 @@
-package za.co.addcolour.tiltgame;
+package za.co.addcolour.tiltgame.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,33 +11,37 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
-import za.co.addcolour.tiltgame.databinding.ActivityMainBinding;
+import za.co.addcolour.tiltgame.R;
+import za.co.addcolour.tiltgame.databinding.MainFragmentBinding;
 import za.co.addcolour.tiltgame.helper.SharedPrefsHelper;
-import za.co.addcolour.tiltgame.ui.BaseActivity;
 
-public class MainActivity extends BaseActivity
+import static android.content.Context.WINDOW_SERVICE;
+
+public class MainFragment extends BaseFragment
         implements SensorEventListener {
 
-    public static final String EXTRA_TIME_REMAINING = "EXTRA_TIME_REMAINING";
-    public static final String EXTRA_IS_COUNTDOWN = "EXTRA_IS_COUNTDOWN";
-    public static final String EXTRA_SCORE = "EXTRA_SCORE";
-    public static final String EXTRA_ATTEMPTS = "EXTRA_ATTEMPTS";
+    private static final String EXTRA_TIME_REMAINING = "EXTRA_TIME_REMAINING";
+    private static final String EXTRA_IS_COUNTDOWN = "EXTRA_IS_COUNTDOWN";
+    private static final String EXTRA_SCORE = "EXTRA_SCORE";
+    private static final String EXTRA_ATTEMPTS = "EXTRA_ATTEMPTS";
 
-    private ActivityMainBinding mBinding;
+    private MainFragmentBinding mBinding;
 
     private CountDownTimer mCountDownTimer;
 
@@ -73,42 +77,58 @@ public class MainActivity extends BaseActivity
     private static final float VALUE_DRIFT = 0.05f;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onActivityCreated(@androidx.annotation.Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            mTimeRemaining = savedInstanceState.getLong(EXTRA_TIME_REMAINING);
+            isCountDown = savedInstanceState.getBoolean(EXTRA_IS_COUNTDOWN);
+            mScore = savedInstanceState.getInt(EXTRA_SCORE);
+            mAttempts = savedInstanceState.getInt(EXTRA_ATTEMPTS);
+        }
+    }
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.main_fragment, container, false);
+        mBinding.setLifecycleOwner(this);
+
         initialize();
+        return mBinding.getRoot();
     }
 
     private void initialize() {
-        mTimeRemaining = 3000;
-        mBinding.setIsCountDown(isCountDown);
-
-        mSensorManager = (SensorManager) getSystemService(
-                Context.SENSOR_SERVICE);
-        assert mSensorManager != null;
-        mSensorAccelerometer = mSensorManager.getDefaultSensor(
-                Sensor.TYPE_ACCELEROMETER);
-        mSensorMagnetometer = mSensorManager.getDefaultSensor(
-                Sensor.TYPE_MAGNETIC_FIELD);
-
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        assert wm != null;
-        mDisplay = wm.getDefaultDisplay();
-
-        PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(SharedPrefsHelper
-                .INSTANCE.getColorCode(this), PorterDuff.Mode.SRC_ATOP);
-        mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
-
-        mBinding.btnPlayAgain.setOnClickListener(v -> {
-            isCountDown = true;
+        if (getActivity() != null) {
             mTimeRemaining = 3000;
-            mScore = 0;
-            mAttempts = 1;
-            mBinding.setIsCountDown(true);
-            mBinding.setIsPlayAgain(false);
-            startTimer();
-        });
+            mBinding.setIsCountDown(isCountDown);
+
+            mSensorManager = (SensorManager) getActivity().getSystemService(
+                    Context.SENSOR_SERVICE);
+            assert mSensorManager != null;
+            mSensorAccelerometer = mSensorManager.getDefaultSensor(
+                    Sensor.TYPE_ACCELEROMETER);
+            mSensorMagnetometer = mSensorManager.getDefaultSensor(
+                    Sensor.TYPE_MAGNETIC_FIELD);
+
+            WindowManager wm = (WindowManager) getActivity().getSystemService(WINDOW_SERVICE);
+            assert wm != null;
+            mDisplay = wm.getDefaultDisplay();
+
+            PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(SharedPrefsHelper
+                    .INSTANCE.getColorCode(getActivity()), PorterDuff.Mode.SRC_ATOP);
+            mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
+
+            mBinding.btnPlayAgain.setOnClickListener(v -> {
+                isCountDown = true;
+                mTimeRemaining = 3000;
+                mScore = 0;
+                mAttempts = 1;
+                mBinding.setIsCountDown(true);
+                mBinding.setIsPlayAgain(false);
+                startTimer();
+            });
+        }
     }
 
     @Override
@@ -117,36 +137,37 @@ public class MainActivity extends BaseActivity
     }
 
     private void startTimer() {
+        if (getActivity() != null) {
+            PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(SharedPrefsHelper
+                    .INSTANCE.getColorCode(getActivity()), PorterDuff.Mode.SRC_ATOP);
+            mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
 
-        PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(SharedPrefsHelper
-                .INSTANCE.getColorCode(this), PorterDuff.Mode.SRC_ATOP);
-        mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
+            mCountDownTimer = new CountDownTimer(mTimeRemaining, mCountDownInterval) {
 
-        mCountDownTimer = new CountDownTimer(mTimeRemaining, mCountDownInterval) {
+                public void onTick(long millisUntilFinished) {
+                    if (isCountDown) {
+                        mBinding.textViewSecond.setText(String.valueOf(millisUntilFinished / 1000));
+                        mTimeRemaining = millisUntilFinished;
+                        if ((millisUntilFinished / 1000) == 1)
+                            mBinding.textViewSecondTitle.setText(getResources().getString(R.string.txt_second));
+                        else
+                            mBinding.textViewSecondTitle.setText(getResources().getString(R.string.txt_seconds));
+                    }
 
-            public void onTick(long millisUntilFinished) {
-                if (isCountDown) {
-                    mBinding.textViewSecond.setText(String.valueOf(millisUntilFinished / 1000));
                     mTimeRemaining = millisUntilFinished;
-                    if ((millisUntilFinished / 1000) == 1)
-                        mBinding.textViewSecondTitle.setText(getResources().getString(R.string.txt_second));
-                    else
-                        mBinding.textViewSecondTitle.setText(getResources().getString(R.string.txt_seconds));
                 }
 
-                mTimeRemaining = millisUntilFinished;
-            }
+                public void onFinish() {
+                    mTimeRemaining = 0;
+                    if (isCountDown) {
+                        showToast(getString(R.string.txt_game_has_begun));
+                        isCountDown = false;
 
-            public void onFinish() {
-                mTimeRemaining = 0;
-                if (isCountDown) {
-                    showToast(getString(R.string.txt_game_has_begun));
-                    isCountDown = false;
-
-                    randomIntervalTime();
-                } else randomIntervalTime();
-            }
-        }.start();
+                        randomIntervalTime();
+                    } else randomIntervalTime();
+                }
+            }.start();
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -223,9 +244,8 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
-
         if (mSensorAccelerometer != null) {
             mSensorManager.registerListener(this, mSensorAccelerometer,
                     SensorManager.SENSOR_DELAY_NORMAL);
@@ -238,7 +258,7 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         if (mCountDownTimer != null) if (mTimeRemaining > 0) mCountDownTimer.start();
     }
@@ -309,7 +329,7 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    protected void onSaveInstanceState(@NotNull Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(EXTRA_TIME_REMAINING, mTimeRemaining);
         outState.putBoolean(EXTRA_IS_COUNTDOWN, isCountDown);
@@ -318,28 +338,19 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    protected void onRestoreInstanceState(@NotNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mTimeRemaining = savedInstanceState.getLong(EXTRA_TIME_REMAINING);
-        isCountDown = savedInstanceState.getBoolean(EXTRA_IS_COUNTDOWN);
-        mScore = savedInstanceState.getInt(EXTRA_SCORE);
-        mAttempts = savedInstanceState.getInt(EXTRA_ATTEMPTS);
-    }
-
-    @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         mSensorManager.unregisterListener(this);
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         if (mCountDownTimer != null) mCountDownTimer.onFinish();
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         if (mCountDownTimer != null) mCountDownTimer.cancel();
     }
