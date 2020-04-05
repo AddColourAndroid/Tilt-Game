@@ -29,7 +29,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_recycler_view"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/margin_0"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/layout_arrow"
@@ -46,7 +46,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_arrow"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/margin_0"
                 android:layout_height="match_parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/layout_recycler_view"

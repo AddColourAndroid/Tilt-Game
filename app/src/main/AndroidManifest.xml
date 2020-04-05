@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
-        tools:ignore="AllowBackup">
+        tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
             android:name=".MainActivity"
             android:screenOrientation="landscape">

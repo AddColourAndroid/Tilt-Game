@@ -43,6 +43,10 @@ public abstract class BaseFragment extends Fragment
             ColorPickerAdapter mColorPickerAdapter = new ColorPickerAdapter(this);
             mColorPickerAdapter.setList(mArrayColor);
 
+            PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(SharedPrefsHelper
+                    .INSTANCE.getColorCode(getActivity()), PorterDuff.Mode.SRC_ATOP);
+            mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
+
             mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()
                     , LinearLayoutManager.VERTICAL, false));
             mBinding.recyclerView.setAdapter(mColorPickerAdapter);
