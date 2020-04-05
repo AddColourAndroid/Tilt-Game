@@ -10,9 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.Log;
 import android.view.Display;
-import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
@@ -58,7 +56,6 @@ public class MainActivity extends BaseActivity
     private boolean isRight = false;
 
     private boolean isValidTilt = false;
-    private OrientationEventListener mOrientationListener;
 
     private int mScore = 0;
     private int mAttempts = 1;
@@ -99,29 +96,6 @@ public class MainActivity extends BaseActivity
         assert wm != null;
         mDisplay = wm.getDefaultDisplay();
 
-        mOrientationListener = new OrientationEventListener(this,
-                SensorManager.SENSOR_DELAY_FASTEST) {
-
-            @Override
-            public void onOrientationChanged(int orientation) {
-                Log.d("Mpho", "BACK::: " + orientation);
-                if (orientation == 90 && isBack) {
-                    isValidTilt = true;
-                    Log.d("Mpho", "BACK");
-                } else if (orientation == 270 && isForward) {
-                    isValidTilt = true;
-                    Log.d("Mpho", "FORWARD");
-                } else if (orientation == 180 && isLeft) {
-                    isValidTilt = true;
-
-                    Log.d("Mpho", "LEFT");
-                } else if (orientation == 350 && isRight) {
-                    isValidTilt = true;
-                    Log.d("Mpho", "RIGHT");
-                }
-            }
-        };
-
         PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(SharedPrefsHelper
                 .INSTANCE.getColorCode(this), PorterDuff.Mode.SRC_ATOP);
         mBinding.imageViewArrow.setColorFilter(porterDuffColorFilter);
@@ -158,9 +132,6 @@ public class MainActivity extends BaseActivity
                         mBinding.textViewSecondTitle.setText(getResources().getString(R.string.txt_second));
                     else
                         mBinding.textViewSecondTitle.setText(getResources().getString(R.string.txt_seconds));
-                } else {
-                    if (mOrientationListener.canDetectOrientation()) mOrientationListener.enable();
-                    else mOrientationListener.disable();
                 }
 
                 mTimeRemaining = millisUntilFinished;
@@ -187,7 +158,6 @@ public class MainActivity extends BaseActivity
             mAttempts += 1;
 
             isValidTilt = false;
-            mOrientationListener.disable();
 
             Random random = new Random();
             int mRandom = random.nextInt(mSecondsList.length);
@@ -225,10 +195,7 @@ public class MainActivity extends BaseActivity
                 isRight = false;
             }
             startTimer();
-        } else {
-            mOrientationListener.disable();
-            mBinding.setIsPlayAgain(true);
-        }
+        } else mBinding.setIsPlayAgain(true);
     }
 
     private void fadeOutAndHideImage(long interval) {
@@ -328,11 +295,11 @@ public class MainActivity extends BaseActivity
         if (Math.abs(roll) < VALUE_DRIFT) roll = 0;
 
         if (pitch > 0) {
-            if (pitch >= 0.60&& isBack) isValidTilt = true;
+            if (pitch >= 0.60 && isBack) isValidTilt = true;
         } else if (Math.abs(pitch) >= 0.60 && isForward) isValidTilt = true;
 
         if (roll > 0) {
-            if (roll >= 0.60&& isRight) isValidTilt = true;
+            if (roll >= 0.60 && isRight) isValidTilt = true;
         } else if (Math.abs(roll) >= 0.60 && isLeft) isValidTilt = true;
     }
 
