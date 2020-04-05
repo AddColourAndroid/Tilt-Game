@@ -1,13 +1,21 @@
 package za.co.addcolour.tiltgame;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
+import android.view.Display;
 import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -23,7 +31,8 @@ import za.co.addcolour.tiltgame.databinding.ActivityMainBinding;
 import za.co.addcolour.tiltgame.helper.SharedPrefsHelper;
 import za.co.addcolour.tiltgame.ui.BaseActivity;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity
+        implements SensorEventListener {
 
     public static final String EXTRA_TIME_REMAINING = "EXTRA_TIME_REMAINING";
     public static final String EXTRA_IS_COUNTDOWN = "EXTRA_IS_COUNTDOWN";
@@ -54,6 +63,18 @@ public class MainActivity extends BaseActivity {
     private int mScore = 0;
     private int mAttempts = 1;
 
+    private SensorManager mSensorManager;
+
+    private Sensor mSensorAccelerometer;
+    private Sensor mSensorMagnetometer;
+
+    private float[] mAccelerometerData = new float[3];
+    private float[] mMagnetometerData = new float[3];
+
+    private Display mDisplay;
+
+    private static final float VALUE_DRIFT = 0.05f;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,19 +87,37 @@ public class MainActivity extends BaseActivity {
         mTimeRemaining = 3000;
         mBinding.setIsCountDown(isCountDown);
 
+        mSensorManager = (SensorManager) getSystemService(
+                Context.SENSOR_SERVICE);
+        assert mSensorManager != null;
+        mSensorAccelerometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER);
+        mSensorMagnetometer = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_MAGNETIC_FIELD);
+
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        assert wm != null;
+        mDisplay = wm.getDefaultDisplay();
+
         mOrientationListener = new OrientationEventListener(this,
                 SensorManager.SENSOR_DELAY_FASTEST) {
 
             @Override
             public void onOrientationChanged(int orientation) {
+                Log.d("Mpho", "BACK::: " + orientation);
                 if (orientation == 90 && isBack) {
                     isValidTilt = true;
+                    Log.d("Mpho", "BACK");
                 } else if (orientation == 270 && isForward) {
                     isValidTilt = true;
+                    Log.d("Mpho", "FORWARD");
                 } else if (orientation == 180 && isLeft) {
                     isValidTilt = true;
+
+                    Log.d("Mpho", "LEFT");
                 } else if (orientation == 350 && isRight) {
                     isValidTilt = true;
+                    Log.d("Mpho", "RIGHT");
                 }
             }
         };
@@ -217,9 +256,89 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (mSensorAccelerometer != null) {
+            mSensorManager.registerListener(this, mSensorAccelerometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        if (mSensorMagnetometer != null) {
+            mSensorManager.registerListener(this, mSensorMagnetometer,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (mCountDownTimer != null) if (mTimeRemaining > 0) mCountDownTimer.start();
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        int sensorType = event.sensor.getType();
+
+        switch (sensorType) {
+            case Sensor.TYPE_ACCELEROMETER:
+                mAccelerometerData = event.values.clone();
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                mMagnetometerData = event.values.clone();
+                break;
+            default:
+                return;
+        }
+
+        float[] rotationMatrix = new float[9];
+        boolean rotationOK = SensorManager.getRotationMatrix(rotationMatrix,
+                null, mAccelerometerData, mMagnetometerData);
+
+        float[] rotationMatrixAdjusted = new float[9];
+        switch (mDisplay.getRotation()) {
+            case Surface.ROTATION_0:
+                rotationMatrixAdjusted = rotationMatrix.clone();
+                break;
+            case Surface.ROTATION_90:
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_X,
+                        rotationMatrixAdjusted);
+                break;
+            case Surface.ROTATION_180:
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Y,
+                        rotationMatrixAdjusted);
+                break;
+            case Surface.ROTATION_270:
+                SensorManager.remapCoordinateSystem(rotationMatrix,
+                        SensorManager.AXIS_MINUS_Y, SensorManager.AXIS_X,
+                        rotationMatrixAdjusted);
+                break;
+        }
+
+        float[] orientationValues = new float[3];
+        if (rotationOK) SensorManager.getOrientation(rotationMatrixAdjusted,
+                orientationValues);
+
+        float pitch = orientationValues[1];
+        float roll = orientationValues[2];
+
+        if (Math.abs(pitch) < VALUE_DRIFT) pitch = 0;
+        if (Math.abs(roll) < VALUE_DRIFT) roll = 0;
+
+        if (pitch > 0) {
+            if (pitch >= 0.60&& isBack) isValidTilt = true;
+        } else if (Math.abs(pitch) >= 0.60 && isForward) isValidTilt = true;
+
+        if (roll > 0) {
+            if (roll >= 0.60&& isRight) isValidTilt = true;
+        } else if (Math.abs(roll) >= 0.60 && isLeft) isValidTilt = true;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
     @Override
@@ -238,6 +357,12 @@ public class MainActivity extends BaseActivity {
         isCountDown = savedInstanceState.getBoolean(EXTRA_IS_COUNTDOWN);
         mScore = savedInstanceState.getInt(EXTRA_SCORE);
         mAttempts = savedInstanceState.getInt(EXTRA_ATTEMPTS);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mSensorManager.unregisterListener(this);
     }
 
     @Override
