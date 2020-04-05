@@ -12,6 +12,4 @@
  - <p><strong><a href="">Apk</a></strong></p>
 Screenshots
 -----------
- - <p><strong><a href="https://github.com/AddColourAndroid/Sports-News-App/tree/master/screenshots">Screens</a></strong></p>
-![List of news](screenshots/news.jpeg "A list of news")
-![news details](screenshots/news_details.jpeg "Details news")
+ - <p><strong><a href="https://github.com/AddColourAndroid/Tilt-Game/tree/master/screenshots">Screens</a></strong></p>
